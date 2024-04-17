@@ -14,17 +14,16 @@ public class Main {
                 conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
 
                 OutputStream os = conn.getOutputStream();
-                os.write(("{\"msg_type\":\"text\",\"content\":{\"text\":\"Hello, " + (index++) + "!\"}}").getBytes(StandardCharsets.UTF_8));
+                os.write(("{\"msg_type\":\"text\",\"content\":{\"text\":\"There, " + (index++) + "!\"}}").getBytes(StandardCharsets.UTF_8));
                 os.flush();
                 os.close();
 
                 int responseCode = conn.getResponseCode();
                 System.out.println("Response Code : " + responseCode);
-                Thread.sleep(60000L);
+                Thread.sleep(12 * 60 * 1000L);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
 }
-
