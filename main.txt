@@ -1,29 +1,42 @@
-import java.io.OutputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
 
 public class Main {
     private static int index = 0;
     public static void main(String[] args) {
         while (true) {
             try {
-                HttpURLConnection conn = (HttpURLConnection) new URL("https://open.larksuite.com/open-apis/bot/v2/hook/9faf42c3-5fc8-4d1c-bd61-4a3a042388dd").openConnection();
-                conn.setDoOutput(true);
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-
-                OutputStream os = conn.getOutputStream();
-                os.write(("{\"msg_type\":\"text\",\"content\":{\"text\":\"There, " + (index++) + "!\"}}").getBytes(StandardCharsets.UTF_8));
-                os.flush();
-                os.close();
-
-                int responseCode = conn.getResponseCode();
-                System.out.println("Response Code : " + responseCode);
+                work();
                 Thread.sleep(12 * 60 * 1000L);
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (Throwable t) {
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                t.printStackTrace(pw);
+                System.out.println(sw);
             }
         }
     }
-}
+    private static void work() throws Exception {
+        try (JsonReader reader = Json.createReader(new StringReader("{\"users\":[{\"name\":\"John\", \"age\":30}, {\"name\":\"Jane\", \"age\":25}]}"))) {
+            JsonObject jsonObject = reader.readObject();
+            JsonArray usersArray = jsonObject.getJsonArray("users");
+            HttpURLConnection conn = (HttpURLConnection) new URL("https://open.larksuite.com/open-apis/bot/v2/hook/9faf42c3-5fc8-4d1c-bd61-4a3a042388dd").openConnection();
+            conn.setDoOutput(true);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+
+            OutputStream os = conn.getOutputStream();
+            os.write(("{\"msg_type\":\"text\",\"content\":{\"text\":\"" + usersArray.getJsonObject(0).getString("name") + ": " + (index++) + "\"}}").getBytes(StandardCharsets.UTF_8));
+            os.flush();
+            os.close();
+
+            int responseCode = conn.getResponseCode();
+            System.out.println("Response Code : " + responseCode);
+        }
+    }}
